@@ -1,86 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Healthcare AI Security Demo</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<head>
+  <body>
+    <h1>SOS Healthcare Platform</h1>
+    <nav class="tab-nav">
+      <a href="index.html" class="tab active">💬 Chat</a>
+      <a href="dashboard.html" class="tab">📊 Dashboard</a>
+    </nav>
 
-<meta charset="UTF-8">
-<title>Healthcare AI Security Demo</title>
-<link rel="stylesheet" href="style.css">
+    <div class="toggleWrapper">
+      <label class="switch">
+        <input type="checkbox" id="lakeraToggle" onchange="toggleLakera()" />
+        <span class="slider"></span>
+      </label>
 
-</head>
+      <div id="lakeraIndicator">Lakera Guard OFF</div>
+    </div>
 
-<body>
+    <div class="stats">
+      <div class="statBox">
+        Lakera Blocks
 
-<h1>SOS Healthcare Platform</h1>
+        <div id="lakeraCount">0</div>
+      </div>
+    </div>
 
-<div class="toggleWrapper">
+    <div class="layout">
+      <div class="chatSection">
+        <h2>Healthcare Assistant</h2>
 
-<label class="switch">
-<input type="checkbox" id="lakeraToggle" onchange="toggleLakera()">
-<span class="slider"></span>
-</label>
+        <div id="chatContainer"></div>
 
-<div id="lakeraIndicator">Lakera Guard OFF</div>
+        <div class="inputBox">
+          <input id="userInput" placeholder="Ask a healthcare question..." />
 
-</div>
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
 
-<div class="stats">
+      <div class="securitySection">
+        <h2>Security Analysis</h2>
 
-<div class="statBox">
+        <div id="securityPanel" class="safePanel">No threats detected</div>
 
-Lakera Blocks
+        <h2>Threat Log</h2>
 
-<div id="lakeraCount">0</div>
+        <div id="logContainer"></div>
 
-</div>
+        <h2>Attack Simulator</h2>
 
-</div>
+        <select id="attackCategory">
+          <option value="">-- Select attack type --</option>
+          <option>Prompt Attack</option>
+          <option>PII – SSN</option>
+          <option>PII – Phone</option>
+          <option>PII – Email</option>
+          <option>PII – Credit Card</option>
+          <option>Crime</option>
+          <option>Hate Speech</option>
+          <option>Violence</option>
+          <option>Weapons</option>
+        </select>
 
-<div class="layout">
+        <button onclick="simulateAttack()">Inject Attack</button>
+      </div>
+    </div>
 
-<div class="chatSection">
-
-<h2>Healthcare Assistant</h2>
-
-<div id="chatContainer"></div>
-
-<div class="inputBox">
-
-<input id="userInput" placeholder="Ask a healthcare question..." />
-
-<button onclick="sendMessage()">Send</button>
-
-</div>
-
-</div>
-
-<div class="securitySection">
-
-<h2>Security Analysis</h2>
-
-<div id="securityPanel" class="safePanel">
-
-No threats detected
-
-</div>
-
-<h2>Threat Log</h2>
-
-<div id="logContainer"></div>
-
-<h2>Attack Simulator</h2>
-
-<button onclick="simulatePromptInjection()">Prompt Injection</button>
-
-<button onclick="simulateDataExfiltration()">Data Exfiltration</button>
-
-<button onclick="simulateReputationAttack()">Reputation Attack</button>
-
-</div>
-
-</div>
-
-<script src="app.js"></script>
-
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>

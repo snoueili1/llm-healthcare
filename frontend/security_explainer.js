@@ -1,72 +1,56 @@
-function explainSecurity(result){
+function explainSecurity(result) {
+  if (result.blocked && result.blocked_by === "lakera") {
+    const threat = result.threat || "Adversarial Prompt";
+    const fired = result.breakdown?.find((b) => b.detected);
+    const detectorId = fired?.detector_id || "unknown";
 
-let explanation=""
+    const impacts = {
+      prompt_attack:
+        "Attackers use this to override system instructions and manipulate the AI into ignoring its safety rules.",
+      "pii/us_social_security_number":
+        "Exposing SSNs can lead to identity theft and violates HIPAA patient data regulations.",
+      "pii/phone_number":
+        "Patient phone numbers are protected health information — leaking them violates privacy policies.",
+      "pii/email":
+        "Patient email addresses are sensitive — sharing them without consent breaches data protection rules.",
+      "pii/credit_card":
+        "Credit card data exposure leads to direct financial fraud and regulatory violations.",
+      "moderated_content/crime":
+        "This request attempted to extract information that could facilitate illegal activity.",
+      "moderated_content/hate":
+        "Hate speech in a healthcare context could harm vulnerable patients and damage trust.",
+      "moderated_content/violence":
+        "Content promoting violence poses a direct safety risk to patients and staff.",
+      "moderated_content/weapons":
+        "Weapons-related content has no place in a healthcare assistant and signals a security threat.",
+      unknown_links:
+        "Unrecognized links can be phishing attempts or vectors for indirect prompt injection.",
+    };
 
-if(result.blocked && result.blocked_by==="lakera"){
+    const detectorType = fired?.detector_type || "";
+    const impact =
+      impacts[detectorType] ||
+      "This request contains adversarial patterns that could compromise the integrity of the AI assistant.";
 
-explanation=`
+    return `
+      <h3>🚨 Threat Blocked by Lakera Guard</h3>
+      <p><b>Threat type:</b> ${threat}</p>
+      <p><b>Detector:</b> ${detectorId}</p>
+      <p><b>Why it was blocked:</b> ${impact}</p>
+      <p><b>Security action:</b> The request was intercepted before reaching the AI model.</p>
+    `;
+  }
 
-<h3>Lakera Guard Intervention</h3>
+  if (result.model_blocked) {
+    return `
+      <h3>⚠️ Blocked by Model Safety</h3>
+      <p>Lakera did not detect adversarial manipulation, but the AI model identified the response as potentially unsafe.</p>
+      <p><b>Security action:</b> The model refused to generate a harmful response.</p>
+    `;
+  }
 
-Lakera analyzes every user prompt before it reaches the AI model.
-
-<b>Threat detected:</b> Prompt Injection attempt
-
-This request attempted to override the assistant’s internal instructions.
-Attackers often use this technique to manipulate AI systems and bypass safety rules.
-
-<b>Security action:</b> Lakera blocked the request before it reached the AI model.
-
-<b>Why this matters:</b>
-
-Blocking adversarial prompts prevents attackers from manipulating
-the AI assistant and protects patients from unsafe or misleading medical guidance.
-
-`
-
-}
-
-else if(result.model_blocked){
-
-explanation=`
-
-<h3>AI Model Safety Protection</h3>
-
-Lakera analyzed the prompt and did not detect adversarial manipulation.
-
-However the AI model identified the request as unsafe.
-
-<b>Threat detected:</b> Potentially harmful or misleading content
-
-<b>Security action:</b> The AI model refused to generate a harmful response.
-
-<b>Security impact:</b>
-
-This prevents reputational damage and protects patients
-from misleading or unsafe medical information.
-
-`
-
-}
-
-else{
-
-explanation=`
-
-<h3>Secure Interaction</h3>
-
-The prompt passed through the entire AI security pipeline.
-
-<b>Lakera Guard:</b> No adversarial prompt detected.
-
-<b>AI Model Safety:</b> Response generated within safety guidelines.
-
-The interaction is considered secure.
-
-`
-
-}
-
-return explanation
-
+  return `
+    <h3>✅ Secure Interaction</h3>
+    <p>No threats detected by Lakera Guard. Response generated within safety guidelines.</p>
+  `;
 }

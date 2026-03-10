@@ -33,9 +33,7 @@ Rules:
 
 
 def analyze_lakera(prompt):
-
     url = "https://api.lakera.ai/v2/guard"
-
     headers = {
         "Authorization": f"Bearer {LAKERA_API_KEY}",
         "Content-Type": "application/json"
@@ -47,37 +45,36 @@ def analyze_lakera(prompt):
                 "role": "user",
                 "content": prompt
             }
-        ]
+        ], 
+        "breakdown": True
     }
 
     try:
-
         response = requests.post(url, headers=headers, json=payload)
-
         data = response.json()
-
         return data
-
     except:
-
         return {"flagged": False}
 
-
-def classify_attack(prompt):
-
-    p = prompt.lower()
-
-    if "ignore previous instructions" in p or "system prompt" in p:
-        return "Prompt Injection"
-
-    if "api key" in p or "environment variable" in p or "credentials" in p:
-        return "Data Exfiltration"
-
-    if "unsafe hospital" in p or "malpractice" in p or "dangerous hospital" in p:
-        return "Reputation Attack"
-
+def classify_from_breakdown(breakdown: list) -> str:
+    for item in breakdown:
+        if item.get("detected"):
+            detector_type = item.get("detector_type", "")
+            labels = {
+                "prompt_attack":                    "Prompt Attack",
+                "pii/us_social_security_number":    "PII – SSN",
+                "pii/phone_number":                 "PII – Phone",
+                "pii/email":                        "PII – Email",
+                "pii/name":                         "PII – Name",
+                "pii/credit_card":                  "PII – Credit Card",
+                "moderated_content/crime":          "Crime",
+                "moderated_content/hate":           "Hate Speech",
+                "moderated_content/violence":       "Violence",
+                "moderated_content/weapons":        "Weapons",
+                "unknown_links":                    "Unknown Links",
+            }
+            return labels.get(detector_type, detector_type) 
     return "Adversarial Prompt"
-
 
 @app.post("/chat")
 async def chat(request: Request):
@@ -87,18 +84,17 @@ async def chat(request: Request):
     prompt = data.get("prompt")
     use_lakera = data.get("use_lakera")
 
-    threat_type = classify_attack(prompt)
-
     if use_lakera:
-
         lakera_result = analyze_lakera(prompt)
 
         if lakera_result.get("flagged"):
-
+            breakdown = lakera_result.get("breakdown", [])
+            threat_type = classify_from_breakdown(breakdown)
             return {
                 "blocked": True,
                 "blocked_by": "lakera",
-                "threat": threat_type
+                "threat": threat_type, 
+                "breakdown": lakera_result.get("breakdown", [])
             }
 
     completion = client.chat.completions.create(
@@ -110,7 +106,6 @@ async def chat(request: Request):
     )
 
     text = completion.choices[0].message.content
-
     return {
         "response": text
     }

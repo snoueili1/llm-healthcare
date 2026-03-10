@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Security Metrics – SOS Healthcare</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+      body {
+        font-family: Arial;
+        background: #0f172a;
+        color: white;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1 {
+        text-align: center;
+        margin-top: 30px;
+      }
+
+      .tab-nav {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin: 16px 0 30px;
+      }
+      .tab {
+        text-decoration: none;
+        padding: 8px 20px;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        color: #94a3b8;
+        font-size: 14px;
+      }
+      .tab.active {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+      }
+
+      /* ── KPIs ── */
+      .kpi-bar {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        padding: 0 40px 30px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .kpi {
+        background: #1e293b;
+        padding: 22px 20px;
+        border-radius: 8px;
+        border-left: 4px solid transparent;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .kpi.blue {
+        border-left-color: #38bdf8;
+      }
+      .kpi.red {
+        border-left-color: #ef4444;
+      }
+      .kpi.green {
+        border-left-color: #22c55e;
+      }
+      .kpi.yellow {
+        border-left-color: #fbbf24;
+      }
+      .kpi-label {
+        font-size: 11px;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .kpi-value {
+        font-size: 38px;
+        font-weight: bold;
+        line-height: 1;
+      }
+      .kpi.blue .kpi-value {
+        color: #38bdf8;
+      }
+      .kpi.red .kpi-value {
+        color: #ef4444;
+      }
+      .kpi.green .kpi-value {
+        color: #22c55e;
+      }
+      .kpi.yellow .kpi-value {
+        color: #fbbf24;
+      }
+      .kpi-sub {
+        font-size: 11px;
+        color: #475569;
+      }
+
+      /* ── charts row ── */
+      .charts-row {
+        display: flex;
+        gap: 20px;
+        padding: 0 40px 30px;
+        max-width: 1100px;
+        margin: 0 auto;
+        align-items: stretch;
+      }
+
+      .panel {
+        background: #1e293b;
+        border-radius: 10px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .panel.donut {
+        flex: 0 0 360px;
+      }
+      .panel.bar {
+        flex: 1;
+      }
+
+      .panel-title {
+        font-size: 13px;
+        font-weight: bold;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .chart-wrap {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 220px;
+      }
+      .chart-wrap canvas {
+        max-width: 100%;
+      }
+
+      .donut-centre {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: none;
+      }
+      .donut-centre .big {
+        font-size: 32px;
+        font-weight: bold;
+        color: white;
+        line-height: 1;
+      }
+      .donut-centre .small {
+        font-size: 10px;
+        color: #475569;
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        font-size: 12px;
+        color: #94a3b8;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .legend-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .empty-state {
+        font-size: 12px;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 180px;
+      }
+
+      /* ── controls ── */
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 14px 40px;
+        background: #1e293b;
+        border-top: 1px solid #334155;
+        font-size: 12px;
+        color: #94a3b8;
+      }
+      .live-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: #22c55e;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .live-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 6px #22c55e;
+        animation: pulse 1.8s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.3;
+          transform: scale(0.6);
+        }
+      }
+      button {
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        background: #2563eb;
+        color: white;
+        cursor: pointer;
+        font-size: 12px;
+        font-family: Arial;
+        transition: background 0.2s;
+        margin: 0;
+      }
+      button:hover {
+        background: #1d4ed8;
+      }
+      button.danger {
+        background: #7f1d1d;
+        color: #fca5a5;
+      }
+      button.danger:hover {
+        background: #991b1b;
+      }
+      button.reset {
+        background: transparent;
+        border: 1px solid #334155;
+        color: #94a3b8;
+        margin-left: auto;
+      }
+      button.reset:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SOS Healthcare Platform</h1>
+
+    <nav class="tab-nav">
+      <a href="index.html" class="tab">💬 Chat</a>
+      <a href="dashboard.html" class="tab active">📊 Dashboard</a>
+    </nav>
+
+    <!-- KPIs -->
+    <div class="kpi-bar">
+      <div class="kpi blue">
+        <div class="kpi-label">Total Screened</div>
+        <div class="kpi-value" id="kpi-total">0</div>
+        <div class="kpi-sub">requests through Lakera</div>
+      </div>
+      <div class="kpi red">
+        <div class="kpi-label">Threats Blocked</div>
+        <div class="kpi-value" id="kpi-blocked">0</div>
+        <div class="kpi-sub">flagged &amp; intercepted</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-label">Requests Allowed</div>
+        <div class="kpi-value" id="kpi-allowed">0</div>
+        <div class="kpi-sub">passed all detectors</div>
+      </div>
+      <div class="kpi yellow">
+        <div class="kpi-label">Blocked Request Rate%</div>
+        <div class="kpi-value" id="kpi-rate">0%</div>
+        <div class="kpi-sub">of screened requests</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="panel donut">
+        <div class="panel-title">Threat Breakdown by Type</div>
+        <div class="chart-wrap">
+          <div class="empty-state" id="donut-empty">
+            No threats detected yet
+          </div>
+          <canvas
+            id="donutChart"
+            style="display: none; max-height: 240px"
+          ></canvas>
+          <div class="donut-centre" id="donut-centre" style="display: none">
+            <div class="big" id="donut-total">0</div>
+            <div class="small">THREATS</div>
+          </div>
+        </div>
+        <div class="legend" id="donut-legend"></div>
+      </div>
+
+      <div class="panel bar">
+        <div class="panel-title">Request Overview</div>
+        <div class="chart-wrap">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div
+      style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px 16px;
+        max-width: 1100px;
+        margin: 0 auto;
+      "
+    >
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        Live Session
+      </div>
+      <button class="reset" onclick="resetAll()">↺ Reset</button>
+    </div>
+
+    <script>
+      const DETECTOR_COLORS = {
+        prompt_attack: "#38bdf8",
+        "pii/us_social_security_number": "#a78bfa",
+        "pii/phone_number": "#a78bfa",
+        "pii/email": "#a78bfa",
+        "pii/name": "#a78bfa",
+        "pii/credit_card": "#a78bfa",
+        "moderated_content/crime": "#fbbf24",
+        "moderated_content/hate": "#f97316",
+        "moderated_content/violence": "#ef4444",
+        "moderated_content/weapons": "#ef4444",
+        unknown_links: "#22c55e",
+        other: "#94a3b8",
+      };
+
+      const DETECTOR_LABELS = {
+        prompt_attack: "Prompt Attack",
+        "pii/us_social_security_number": "PII – SSN",
+        "pii/phone_number": "PII – Phone",
+        "pii/email": "PII – Email",
+        "pii/name": "PII – Name",
+        "pii/credit_card": "PII – Credit Card",
+        "moderated_content/crime": "Crime",
+        "moderated_content/hate": "Hate Speech",
+        "moderated_content/violence": "Violence",
+        "moderated_content/weapons": "Weapons",
+        unknown_links: "Unknown Links",
+        other: "Other",
+      };
+
+      let state = { total: 0, blocked: 0, allowed: 0, detectors: {} };
+
+      let donutChart, barChart;
+
+      function initCharts() {
+        Chart.defaults.color = "#94a3b8";
+        Chart.defaults.borderColor = "#334155";
+        Chart.defaults.font.family = "Arial";
+        Chart.defaults.font.size = 12;
+
+        donutChart = new Chart(document.getElementById("donutChart"), {
+          type: "doughnut",
+          data: {
+            labels: [],
+            datasets: [
+              { data: [], backgroundColor: [], borderWidth: 0, hoverOffset: 8 },
+            ],
+          },
+          options: {
+            cutout: "68%",
+            animation: { duration: 500 },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `  ${ctx.label}: ${ctx.parsed} attacks`,
+                },
+              },
+            },
+          },
+        });
+
+        barChart = new Chart(document.getElementById("barChart"), {
+          type: "bar",
+          data: {
+            labels: ["Total Screened", "Threats Blocked", "Requests Allowed"],
+            datasets: [
+              {
+                data: [0, 0, 0],
+                backgroundColor: ["#38bdf822", "#ef444422", "#22c55e22"],
+                borderColor: ["#38bdf8", "#ef4444", "#22c55e"],
+                borderWidth: 1,
+                borderRadius: 4,
+                barThickness: 32,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            animation: { duration: 400 },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: { label: (ctx) => `  ${ctx.parsed.x} requests` },
+              },
+            },
+            scales: {
+              x: {
+                grid: { color: "#1e293b" },
+                ticks: { color: "#94a3b8", precision: 0 },
+              },
+              y: {
+                grid: { display: false },
+                ticks: { color: "#e2e8f0", font: { size: 13, weight: "bold" } },
+              },
+            },
+          },
+        });
+      }
+
+      function addEvent(detectorType, isBlocked) {
+        state.total++;
+        if (isBlocked) {
+          state.blocked++;
+          const key = detectorType || "other";
+          state.detectors[key] = (state.detectors[key] || 0) + 1;
+        } else {
+          state.allowed++;
+        }
+        updateAll();
+      }
+
+      function updateAll() {
+        document.getElementById("kpi-total").textContent = state.total;
+        document.getElementById("kpi-blocked").textContent = state.blocked;
+        document.getElementById("kpi-allowed").textContent = state.allowed;
+        document.getElementById("kpi-rate").textContent = state.total
+          ? Math.round((state.blocked / state.total) * 100) + "%"
+          : "0%";
+
+        barChart.data.datasets[0].data = [
+          state.total,
+          state.blocked,
+          state.allowed,
+        ];
+        barChart.update();
+
+        const keys = Object.keys(state.detectors);
+        const values = keys.map((k) => state.detectors[k]);
+        const colors = keys.map(
+          (k) => DETECTOR_COLORS[k] || DETECTOR_COLORS.other,
+        );
+        const labels = keys.map((k) => DETECTOR_LABELS[k] || k);
+        const total = values.reduce((a, b) => a + b, 0);
+
+        if (total > 0) {
+          document.getElementById("donut-empty").style.display = "none";
+          document.getElementById("donutChart").style.display = "block";
+          document.getElementById("donut-centre").style.display = "block";
+          document.getElementById("donut-total").textContent = total;
+
+          donutChart.data.labels = labels;
+          donutChart.data.datasets[0].data = values;
+          donutChart.data.datasets[0].backgroundColor = colors;
+          donutChart.update();
+
+          document.getElementById("donut-legend").innerHTML = keys
+            .map(
+              (k, i) =>
+                `<div class="legend-item">
+        <div class="legend-dot" style="background:${colors[i]}"></div>
+        <span>${labels[i]}: ${values[i]}</span>
+      </div>`,
+            )
+            .join("");
+        }
+      }
+
+      function resetAll() {
+        state = { total: 0, blocked: 0, allowed: 0, detectors: {} };
+        sessionStorage.removeItem("lakeraEvents"); // ← add this
+        sessionStorage.removeItem("lakeraBlocks"); // ← add
+        lastCount = 0; // ← add this too
+        document.getElementById("donut-empty").style.display = "flex";
+        document.getElementById("donutChart").style.display = "none";
+        document.getElementById("donut-centre").style.display = "none";
+        document.getElementById("donut-legend").innerHTML = "";
+        updateAll();
+      }
+
+      // Load from sessionStorage on page open
+      function loadFromStorage() {
+        const events = JSON.parse(
+          sessionStorage.getItem("lakeraEvents") || "[]",
+        );
+        events.forEach((e) => addEvent(e.detectorType, e.blocked));
+      }
+
+      // Poll for new events every 2s (when chat tab is open in parallel)
+      let lastCount = 0;
+      setInterval(() => {
+        const events = JSON.parse(
+          sessionStorage.getItem("lakeraEvents") || "[]",
+        );
+        if (events.length > lastCount) {
+          events
+            .slice(lastCount)
+            .forEach((e) => addEvent(e.detectorType, e.blocked));
+          lastCount = events.length;
+        }
+      }, 2000);
+
+      initCharts();
+      loadFromStorage();
+      lastCount = JSON.parse(
+        sessionStorage.getItem("lakeraEvents") || "[]",
+      ).length;
+    </script>
+  </body>
+</html>
