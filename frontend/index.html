@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Healthcare AI Security Demo</title>
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<h1>SOS Healthcare Platform</h1>
+
+<div class="toggleWrapper">
+
+<label class="switch">
+<input type="checkbox" id="lakeraToggle" onchange="toggleLakera()">
+<span class="slider"></span>
+</label>
+
+<div id="lakeraIndicator">Lakera Guard OFF</div>
+
+</div>
+
+<div class="stats">
+
+<div class="statBox">
+
+Lakera Blocks
+
+<div id="lakeraCount">0</div>
+
+</div>
+
+</div>
+
+<div class="layout">
+
+<div class="chatSection">
+
+<h2>Healthcare Assistant</h2>
+
+<div id="chatContainer"></div>
+
+<div class="inputBox">
+
+<input id="userInput" placeholder="Ask a healthcare question..." />
+
+<button onclick="sendMessage()">Send</button>
+
+</div>
+
+</div>
+
+<div class="securitySection">
+
+<h2>Security Analysis</h2>
+
+<div id="securityPanel" class="safePanel">
+
+No threats detected
+
+</div>
+
+<h2>Threat Log</h2>
+
+<div id="logContainer"></div>
+
+<h2>Attack Simulator</h2>
+
+<button onclick="simulatePromptInjection()">Prompt Injection</button>
+
+<button onclick="simulateDataExfiltration()">Data Exfiltration</button>
+
+<button onclick="simulateReputationAttack()">Reputation Attack</button>
+
+</div>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
