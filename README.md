@@ -160,6 +160,10 @@ Two charts are displayed:
 - **Detector Distribution** — donut chart showing which detector types fired during the session such as prompt attacks, PII exposure, or moderated content.
 - **Request Overview** — horizontal bar comparing screened vs blocked vs allowed
 
+<img src="assets/dashboard.png" width="700">
+
+*Figure: Main Dashboard showing the number and variety of attacks intercepted by Lakera Guard*
+
 ---
 
 ## Threat Classification
