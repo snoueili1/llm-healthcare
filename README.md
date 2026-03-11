@@ -142,6 +142,15 @@ Possible states:
 - **Threat Blocked (Red)** — Lakera detected and intercepted the prompt before it reached the model
 - **Secure Interaction (Green)** — the prompt passed all detectors and a safe response was generated
 
+<p align="center">
+  <img src="assets/attack.png" width="900">
+</p>
+
+<p align="center">
+  <em>Figure: A rm -rf prompt, directly classified as Prompt Attack, intercepted and blocked by Lakera. </em>
+</p>
+
+
 ---
 
 ### Security Metrics Dashboard
