@@ -148,11 +148,11 @@ Possible states:
 
 A separate dashboard tab (`dashboard.html`) shows session-level metrics:
 
-| Metric           	| Description                                      			 |
-| ---------------- 	| -----------------------------------------------------------------------|
-| Total Screened   	| Total Number Requests analyzed by Lakera                      	 |
-| Threats Blocked  	| Flagged and intercepted requests before reaching the LLM      	 |	
-| Requests Allowed 	| Requests that passed all detectors and forwarded to the LLM   	 |
+| Metric           	| Description                                      			                     |
+| ---------------- 	| ---------------------------------------------------------------------------|
+| Total Screened   	| Total Number Requests analyzed by Lakera                      	           |
+| Threats Blocked  	| Flagged and intercepted requests before reaching the LLM      	           |	
+| Requests Allowed 	| Requests that passed all detectors and forwarded to the LLM   	           |
 | Blocked Request Rate% | Percentage of screened requests that were attacks and blocked by Lakera|
 
 Two charts are displayed:
@@ -160,9 +160,14 @@ Two charts are displayed:
 - **Detector Distribution** — donut chart showing which detector types fired during the session such as prompt attacks, PII exposure, or moderated content.
 - **Request Overview** — horizontal bar comparing screened vs blocked vs allowed
 
-<img src="assets/dashboard.png" width="700">
 
-*Figure: Main Dashboard showing the number and variety of attacks intercepted by Lakera Guard*
+<p align="center">
+  <img src="assets/dashboard.png" width="900">
+</p>
+
+<p align="center">
+  <em>Figure: Dashboard showing the number and variety of attacks intercepted by Lakera Guard</em>
+</p>
 
 ---
 
